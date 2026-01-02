@@ -51,6 +51,21 @@ const Style = () => {
       color: #dd3333;
       cursor: pointer;
   }
+
+  /* 📱 Mobile portrait: hide post cover image */
+  
+  @media (max-width: 768px) {
+    #theme-simple .blog-item-cover,
+    #theme-simple .blog-item-image,
+    #theme-simple .blog-item img {
+      display: none !important;
+    }
+  
+    /* 让文字区域占满宽度 */
+    #theme-simple .blog-item-content {
+      width: 100% !important;
+    }
+  }
   
   
 
