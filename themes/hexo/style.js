@@ -7,7 +7,6 @@ import CONFIG from './config'
  * 主题客制化 css（⚠️ 只能写标准 CSS）
  */
 const Style = () => {
-  // 从配置中获取主题色，如果没有配置则使用默认值
   const themeColor = siteConfig('HEXO_THEME_COLOR', '#928CEE', CONFIG)
 
   return (
