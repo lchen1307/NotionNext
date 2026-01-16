@@ -1,8 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
-import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import CONFIG from '../config'
 
 import Logo from './Logo'
@@ -13,13 +12,9 @@ import SideBar from './SideBar'
 import SideBarDrawer from './SideBarDrawer'
 import ButtonRandomPost from './ButtonRandomPost'
 
-/**
- * 顶部导航 Header（最终稳定版）
- */
 const Header = props => {
-  const { tags, currentTag, categories, currentCategory } = props
-  const { locale } = useGlobal()
   const router = useRouter()
+  const { locale } = useGlobal()
 
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -27,16 +22,13 @@ const Header = props => {
   const showSearchButton = siteConfig('HEXO_MENU_SEARCH', false, CONFIG)
   const showRandomButton = siteConfig('HEXO_MENU_RANDOM', false, CONFIG)
 
-  // ===============================
-  // 滚动逻辑：透明 → 紫色（不再隐藏）
-  // ===============================
+  // === 透明 → 紫色（不隐藏）===
   useEffect(() => {
     const onScroll = () => {
-      const headerEl = document.querySelector('#header')
-      const threshold = headerEl ? headerEl.clientHeight - 80 : 120
+      const header = document.querySelector('#header')
+      const threshold = header ? header.clientHeight - 80 : 120
       setScrolled(window.scrollY > threshold)
     }
-
     onScroll()
     window.addEventListener('scroll', onScroll)
     router.events.on('routeChangeComplete', onScroll)
@@ -49,50 +41,38 @@ const Header = props => {
 
   return (
     <div id="top-nav" className="z-40">
-      {/* 搜索抽屉 */}
       <SearchDrawer />
 
-      {/* ================= Header 本体 ================= */}
+      {/* ===== Header 本体 ===== */}
       <div
         id="sticky-nav"
         className={`
           fixed top-0 left-0 w-full transition-all duration-300
-          ${scrolled
-            ? 'bg-[#9c93ad] shadow-md'
-            : 'bg-transparent'}
+          ${scrolled ? 'bg-[#9c93ad] shadow-md' : 'bg-transparent'}
         `}
         style={{ backdropFilter: scrolled ? 'blur(6px)' : 'none' }}
       >
-        {/* === 和正文完全一致的宽度容器 === */}
-        <div className="mx-auto max-w-7xl px-6">
+        {/* 🔥 关键：和正文一模一样的容器 🔥 */}
+        <div className="mx-auto max-w-5xl px-2 md:px-4">
           <div className="flex items-center justify-between h-14">
 
-            {/* ===== 左侧 Logo ===== */}
-            <div className="flex items-center">
-              <div className="text-xl font-semibold tracking-wide text-white">
-                <Logo {...props} />
-              </div>
+            {/* 左侧：站点名 */}
+            <div className="text-xl font-semibold text-white">
+              <Logo {...props} />
             </div>
 
-            {/* ===== 右侧菜单 ===== */}
+            {/* 右侧菜单 */}
             <div className="flex items-center gap-4 text-sm text-white">
-
-              {/* 桌面端菜单 */}
               <div className="hidden lg:flex items-center gap-4">
                 <MenuListTop
                   {...props}
-                  className="
-                    text-white
-                    hover:text-[#5aa9ff]
-                    transition-colors
-                  "
+                  className="hover:text-[#5aa9ff] transition-colors"
                 />
               </div>
 
               {showSearchButton && <SearchButton />}
               {showRandomButton && <ButtonRandomPost {...props} />}
 
-              {/* 移动端菜单按钮 */}
               <div
                 onClick={() => setIsOpen(!isOpen)}
                 className="lg:hidden cursor-pointer"
@@ -105,7 +85,7 @@ const Header = props => {
         </div>
       </div>
 
-      {/* ================= 侧边栏 ================= */}
+      {/* 侧边栏 */}
       <SideBarDrawer isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <SideBar {...props} />
       </SideBarDrawer>
