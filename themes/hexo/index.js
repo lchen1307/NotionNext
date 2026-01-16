@@ -121,7 +121,7 @@ const LayoutBase = props => {
         
             {/* 正文：单栏居中 */}
             <div
-              className={`${className || ''} w-full max-w-3xl mx-auto h-full overflow-hidden`}>
+              className={`${className || ''} w-full max-w-5xl mx-auto h-full overflow-hidden`}>
         
               <Transition
                 show={!onLoading}
