@@ -17,7 +17,6 @@ import ArticleRecommend from './components/ArticleRecommend'
 import BlogPostArchive from './components/BlogPostArchive'
 import BlogPostListPage from './components/BlogPostListPage'
 import BlogPostListScroll from './components/BlogPostListScroll'
-import BlogHeatmap from './components/BlogHeatmap'
 import ButtonJumpToComment from './components/ButtonJumpToComment'
 import ButtonRandomPostMini from './components/ButtonRandomPostMini'
 import Card from './components/Card'
@@ -196,7 +195,6 @@ const LayoutIndex = props => {
 const LayoutPostList = props => {
   return (
     <div className='pt-8'>
-      <BlogHeatmap posts={props.posts} />
       <SlotBar {...props} />
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
         <BlogPostListPage {...props} />
