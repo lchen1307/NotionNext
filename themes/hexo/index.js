@@ -115,13 +115,13 @@ const LayoutBase = props => {
         <main
           id='wrapper'
           className={`
-            ${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? '' : 'pt-16'}
-            bg-gray-100 dark:bg-black
-            w-full min-h-screen
-            py-12
-            relative
+            ${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? '-mt-32' : 'pt-16'}
+            bg-hexo-background-gray dark:bg-black
+            w-full py-8 md:px-8 min-h-screen
+            relative z-10
           `}
         >
+
           <div className='w-full flex justify-center'>
             {/* =========================
                 白色大 Card（关键）
