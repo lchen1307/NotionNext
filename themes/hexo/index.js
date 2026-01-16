@@ -115,14 +115,13 @@ const LayoutBase = props => {
         <main
           id='wrapper'
           className={`
-            ${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
-              ? '-mt-16 md:-mt-24'
-              : 'pt-16'}
+            ${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? 'pt-0' : 'pt-16'}
             bg-hexo-background-gray dark:bg-black
             w-full py-8 md:px-8 min-h-screen
-            relative z-10
+            relative
           `}
         >
+
 
           <div className='w-full flex justify-center'>
             {/* =========================
@@ -132,14 +131,16 @@ const LayoutBase = props => {
               className={`
                 w-full max-w-5xl
                 mx-auto
+                -mt-16 md:-mt-24
                 bg-white dark:bg-hexo-black-gray
                 rounded-2xl
                 shadow-card
                 px-6 md:px-10
                 py-8 md:py-10
-                transition-all
+                relative z-20
               `}
             >
+
               <Transition
                 show={!onLoading}
                 appear
