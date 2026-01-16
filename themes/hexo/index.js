@@ -65,7 +65,6 @@ const LayoutBase = props => {
   const drawerRight = useRef(null)
   const tocRef = isBrowser ? document.getElementById('article-wrapper') : null
 
-  // 悬浮按钮内容
   const floatSlot = (
     <>
       {post?.toc?.length > 1 && (
@@ -82,76 +81,90 @@ const LayoutBase = props => {
     </>
   )
 
-  // Algolia搜索框
   const searchModal = useRef(null)
 
   return (
     <ThemeGlobalHexo.Provider value={{ searchModal }}>
       <div
         id='theme-hexo'
-        className={`${siteConfig('FONT_STYLE')} dark:bg-black scroll-smooth`}>
+        className={`${siteConfig('FONT_STYLE')} dark:bg-black scroll-smooth`}
+      >
         <Style />
 
         {/* 顶部导航 */}
         <Header {...props} />
 
-        {/* 顶部嵌入 */}
+        {/* Hero / PostHero */}
         <Transition
           show={!onLoading}
-          appear={true}
-          enter='transition ease-in-out duration-700 transform order-first'
+          appear
+          enter='transition ease-in-out duration-700 transform'
           enterFrom='opacity-0 -translate-y-16'
           enterTo='opacity-100'
           leave='transition ease-in-out duration-300 transform'
           leaveFrom='opacity-100'
           leaveTo='opacity-0 translate-y-16'
-          unmount={false}>
+          unmount={false}
+        >
           {headerSlot}
         </Transition>
 
-        {/* 主区块 */}
+        {/* =========================
+            灰色地板（关键）
+        ========================== */}
         <main
           id='wrapper'
-          className={`${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? '' : 'pt-16'}
-            bg-hexo-background-gray dark:bg-black w-full py-8 md:px-8 min-h-screen relative`}>
-        
-          <div
-            id='container-inner'
-            className='w-full mx-auto flex justify-center relative z-10'>
-        
-            {/* 正文：单栏居中 */}
+          className={`
+            ${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? '' : 'pt-16'}
+            bg-gray-100 dark:bg-black
+            w-full min-h-screen
+            py-12
+            relative
+          `}
+        >
+          <div className='w-full flex justify-center'>
+            {/* =========================
+                白色大 Card（关键）
+            ========================== */}
             <div
-              className={`${className || ''} w-full max-w-5xl mx-auto h-full overflow-hidden`}>
-        
+              className={`
+                w-full max-w-5xl
+                mx-auto
+                bg-white dark:bg-hexo-black-gray
+                rounded-2xl
+                shadow-card
+                px-6 md:px-10
+                py-8 md:py-10
+                transition-all
+              `}
+            >
               <Transition
                 show={!onLoading}
-                appear={true}
-                enter='transition ease-in-out duration-700 transform order-first'
+                appear
+                enter='transition ease-in-out duration-700 transform'
                 enterFrom='opacity-0 translate-y-16'
                 enterTo='opacity-100'
                 leave='transition ease-in-out duration-300 transform'
-                leaveFrom='opacity-100 translate-y-0'
+                leaveFrom='opacity-100'
                 leaveTo='opacity-0 -translate-y-16'
-                unmount={false}>
-        
+                unmount={false}
+              >
                 {slotTop}
                 {children}
-        
               </Transition>
             </div>
-        
-            {/* ❌ 右侧栏已彻底移除 */}
           </div>
         </main>
 
+        {/* Toc */}
         <div className='block lg:hidden'>
           <TocDrawer post={post} cRef={drawerRight} targetRef={tocRef} />
         </div>
 
-        {/* 悬浮菜单 */}
+        {/* 悬浮按钮 */}
         <RightFloatArea floatSlot={floatSlot} />
 
-        {/* 全文搜索 */}
+        {/* 搜索 */}
         <AlgoliaSearchModal cRef={searchModal} {...props} />
 
         {/* 页脚 */}
