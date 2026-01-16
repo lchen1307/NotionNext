@@ -5,11 +5,9 @@ import { useEffect, useRef, useState } from 'react'
 import CONFIG from '../config'
 import BlogPostCard from './BlogPostCard'
 import BlogPostListEmpty from './BlogPostListEmpty'
-import Card from './Card'
 
 /**
- * 博客列表（滚动分页）
- * 所有文章放在同一个 Card 中，模拟「一整页纸」效果
+ * 博客列表滚动分页（整体 Card 版）
  */
 const BlogPostListScroll = ({
   posts = [],
@@ -18,51 +16,53 @@ const BlogPostListScroll = ({
   siteInfo
 }) => {
   const { NOTION_CONFIG, locale } = useGlobal()
-  const [page, updatePage] = useState(1)
-
+  const [page, setPage] = useState(1)
   const POSTS_PER_PAGE = siteConfig('POSTS_PER_PAGE', null, NOTION_CONFIG)
-  const postsToShow = getListByPage(posts, page, POSTS_PER_PAGE)
 
+  const postsToShow = getListByPage(posts, page, POSTS_PER_PAGE)
+  const hasMore = posts && page * POSTS_PER_PAGE < posts.length
   const targetRef = useRef(null)
 
-  let hasMore = false
-  if (posts) {
-    hasMore = page * POSTS_PER_PAGE < posts.length
-  }
-
   const handleGetMore = () => {
-    if (hasMore) {
-      updatePage(p => p + 1)
-    }
+    if (hasMore) setPage(p => p + 1)
   }
 
-  // 自动滚动加载
-  const scrollTrigger = () => {
-    requestAnimationFrame(() => {
-      if (!targetRef.current) return
+  // 滚动自动加载
+  useEffect(() => {
+    const onScroll = () => {
       const scrollBottom = window.scrollY + window.innerHeight
-      const containerBottom = targetRef.current.offsetTop + targetRef.current.clientHeight
-      if (scrollBottom > containerBottom - 200) {
+      const height = targetRef.current?.offsetHeight || 0
+      if (scrollBottom > height + 200) {
         handleGetMore()
       }
-    })
-  }
-
-  useEffect(() => {
-    window.addEventListener('scroll', scrollTrigger)
-    return () => window.removeEventListener('scroll', scrollTrigger)
-  })
+    }
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [hasMore])
 
   if (!postsToShow || postsToShow.length === 0) {
     return <BlogPostListEmpty currentSearch={currentSearch} />
   }
 
   return (
-    <Card className='w-full'>
-      {/* 整张“纸”的内容区域 */}
+    <div
+      id="container"
+      ref={targetRef}
+      className="w-full flex justify-center"
+    >
+      {/* ⭐️ 关键：外层「大 Card」 */}
       <div
-        ref={targetRef}
-        className='px-8 md:px-12 py-8 md:py-10 divide-y divide-gray-200 dark:divide-gray-700'
+        className="
+          w-full
+          max-w-5xl
+          bg-white
+          dark:bg-hexo-black-gray
+          rounded-2xl
+          shadow-xl
+          px-6
+          py-6
+          space-y-4
+        "
       >
         {/* 文章列表 */}
         {postsToShow.map((post, index) => (
@@ -78,13 +78,20 @@ const BlogPostListScroll = ({
         {/* 加载更多 */}
         <div
           onClick={handleGetMore}
-          className='pt-6 text-center text-sm cursor-pointer select-none
-                     text-gray-500 dark:text-gray-400 hover:text-indigo-500'
+          className="
+            text-center
+            py-4
+            cursor-pointer
+            text-sm
+            text-gray-500
+            hover:text-gray-800
+            dark:text-gray-400
+          "
         >
           {hasMore ? locale.COMMON.MORE : locale.COMMON.NO_MORE}
         </div>
       </div>
-    </Card>
+    </div>
   )
 }
 
