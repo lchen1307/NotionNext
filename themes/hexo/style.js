@@ -231,7 +231,6 @@ const Style = () => {
         scrollbar-width: thin;
         scrollbar-color: var(--theme-color) transparent;
       }
-      
     `}</style>
   )
 }
