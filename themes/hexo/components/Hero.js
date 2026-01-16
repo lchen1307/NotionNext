@@ -71,10 +71,12 @@ const Hero = props => {
           <span id='typed' />
         </div>
 
-        {/* 首页导航大按钮 */}
+        {/* 首页导航大按钮（已移除） */}
+        {/*
         {siteConfig('HEXO_HOME_NAV_BUTTONS', null, CONFIG) && (
           <NavButtonGroup {...props} />
         )}
+        */}
 
         {/* 滚动按钮 */}
         <div
