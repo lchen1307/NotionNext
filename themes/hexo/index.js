@@ -115,7 +115,9 @@ const LayoutBase = props => {
         <main
           id='wrapper'
           className={`
-            ${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? '-mt-32' : 'pt-16'}
+            ${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG)
+              ? '-mt-16 md:-mt-24'
+              : 'pt-16'}
             bg-hexo-background-gray dark:bg-black
             w-full py-8 md:px-8 min-h-screen
             relative z-10
