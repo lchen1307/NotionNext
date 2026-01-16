@@ -24,7 +24,7 @@ const CONFIG = {
   HEXO_POST_LIST_COVER: false, // 列表显示文章封面
   HEXO_POST_LIST_COVER_HOVER_ENLARGE: false, // 列表鼠标悬停放大
 
-  HEXO_POST_LIST_COVER_DEFAULT: true, // 封面为空时用站点背景做默认封面
+  HEXO_POST_LIST_COVER_DEFAULT: false, // 封面为空时用站点背景做默认封面
   HEXO_POST_LIST_SUMMARY: true, // 文章摘要
   HEXO_POST_LIST_PREVIEW: false, // 读取文章预览
   HEXO_POST_LIST_IMG_CROSSOVER: true, // 博客列表图片左右交错
