@@ -131,7 +131,7 @@ const LayoutBase = props => {
               className={`
                 w-full max-w-5xl
                 mx-auto
-                -mt-16 md:-mt-24
+                -mt-8 md:-mt-12
                 bg-white dark:bg-hexo-black-gray
                 rounded-2xl
                 shadow-card
