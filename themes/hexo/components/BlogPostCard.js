@@ -4,10 +4,6 @@ import SmartLink from '@/components/SmartLink'
 import CONFIG from '../config'
 import { BlogPostCardInfo } from './BlogPostCardInfo'
 
-/**
- * 单篇文章条目（不再自带白色 Card）
- * 由外层 BlogPostListPage / Scroll 统一包一个大 Card
- */
 const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
   const showPreview =
     siteConfig('HEXO_POST_LIST_PREVIEW', null, CONFIG) && post.blockMap
@@ -38,7 +34,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
         w-full
         flex justify-between
         md:flex-row flex-col-reverse
-        py-10
+        py-5 md:py-6
         ${siteConfig('HEXO_POST_LIST_IMG_CROSSOVER', null, CONFIG) && index % 2 === 1
           ? 'md:flex-row-reverse'
           : ''}
@@ -61,7 +57,7 @@ const BlogPostCard = ({ index, post, showSummary, siteInfo }) => {
               priority={index === 1}
               alt={post?.title}
               src={post?.pageCoverThumbnail}
-              className='h-56 w-full object-cover object-center transition-transform duration-500 hover:scale-105'
+              className='h-40 md:h-44 w-full object-cover object-center transition-transform duration-500 hover:scale-105'
             />
           </SmartLink>
         </div>
