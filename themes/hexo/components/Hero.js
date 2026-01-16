@@ -5,30 +5,39 @@ import { useGlobal } from '@/lib/global'
 import { loadExternalResource } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import CONFIG from '../config'
-import NavButtonGroup from './NavButtonGroup'
 
 let wrapperTop = 0
 
 /**
- * 顶部全屏大图
- * @returns
+ * 首页 Hero（半屏 Banner）
  */
 const Hero = props => {
-  const [typed, changeType] = useState()
+  const [typed, setTyped] = useState(null)
   const { siteInfo } = props
   const { locale } = useGlobal()
+
   const scrollToWrapper = () => {
     window.scrollTo({ top: wrapperTop, behavior: 'smooth' })
   }
 
-  const GREETING_WORDS = siteConfig('GREETING_WORDS').split(',')
+  // ===== 安全读取 GREETING_WORDS（不会再炸）=====
+  const GREETING_WORDS = (siteConfig('GREETING_WORDS', '', CONFIG) || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+
   useEffect(() => {
     updateHeaderHeight()
 
-    if (!typed && window && document.getElementById('typed')) {
+    if (
+      !typed &&
+      typeof window !== 'undefined' &&
+      document.getElementById('typed') &&
+      GREETING_WORDS.length > 0
+    ) {
       loadExternalResource('/js/typed.min.js', 'js').then(() => {
         if (window.Typed) {
-          changeType(
+          setTyped(
             new window.Typed('#typed', {
               strings: GREETING_WORDS,
               typeSpeed: 200,
@@ -42,16 +51,16 @@ const Hero = props => {
       })
     }
 
-    window.addEventListener('resize', updateHeight)
+    window.addEventListener('resize', updateHeaderHeight)
     return () => {
       window.removeEventListener('resize', updateHeaderHeight)
     }
-  })
+  }, [typed])
 
   function updateHeaderHeight() {
     requestAnimationFrame(() => {
       const wrapperElement = document.getElementById('wrapper')
-      wrapperTop = wrapperElement?.offsetTop
+      wrapperTop = wrapperElement?.offsetTop || 0
     })
   }
 
@@ -59,42 +68,46 @@ const Hero = props => {
     <header
       id='header'
       style={{ zIndex: 1 }}
-      className='w-full h-screen relative bg-black
+      className='w-full relative bg-black
                  h-[50vh] min-h-[360px] max-h-[520px]'>
-      <div className='text-white absolute bottom-0 flex flex-col h-full items-center justify-center w-full '>
+
+      {/* 文本层 */}
+      <div className='text-white absolute inset-0 flex flex-col items-center justify-center w-full'>
         {/* 站点标题 */}
         <div className='font-black text-4xl md:text-5xl shadow-text'>
           {siteInfo?.title || siteConfig('TITLE')}
         </div>
-        {/* 站点欢迎语 */}
-        <div className='mt-2 h-12 items-center text-center font-medium shadow-text text-lg'>
-          <span id='typed' />
-        </div>
 
-        {/* 首页导航大按钮（已移除） */}
-        {/*
-        {siteConfig('HEXO_HOME_NAV_BUTTONS', null, CONFIG) && (
-          <NavButtonGroup {...props} />
-        )}
-        */}
-
-        {/* 滚动按钮 */}
-        <div
-          onClick={scrollToWrapper}
-          className='z-10 cursor-pointer w-full text-center py-4 text-3xl absolute bottom-10 text-white'>
-          <div className='opacity-70 animate-bounce text-xs'>
-            {siteConfig('HEXO_SHOW_START_READING', null, CONFIG) &&
-              locale.COMMON.START_READING}
+        {/* 打字欢迎语 */}
+        {GREETING_WORDS.length > 0 && (
+          <div className='mt-2 h-12 items-center text-center font-medium shadow-text text-lg'>
+            <span id='typed' />
           </div>
-          <i className='opacity-70 animate-bounce fas fa-angle-down' />
-        </div>
+        )}
+
+        {/* 向下滚动提示 */}
+        {siteConfig('HEXO_SHOW_START_READING', null, CONFIG) && (
+          <div
+            onClick={scrollToWrapper}
+            className='cursor-pointer w-full text-center py-4 absolute bottom-6 text-white'>
+            <div className='opacity-70 animate-bounce text-xs'>
+              {locale.COMMON.START_READING}
+            </div>
+            <i className='opacity-70 animate-bounce fas fa-angle-down' />
+          </div>
+        )}
       </div>
 
+      {/* 背景图 */}
       <LazyImage
         id='header-cover'
         alt={siteInfo?.title}
         src={siteInfo?.pageCover}
-        className={`header-cover w-full h-full object-cover object-center ${siteConfig('HEXO_HOME_NAV_BACKGROUND_IMG_FIXED', null, CONFIG) ? 'fixed' : ''}`}
+        className={`header-cover w-full h-full object-cover object-center ${
+          siteConfig('HEXO_HOME_NAV_BACKGROUND_IMG_FIXED', null, CONFIG)
+            ? 'fixed'
+            : ''
+        }`}
       />
     </header>
   )
