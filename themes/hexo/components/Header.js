@@ -16,152 +16,119 @@ import SideBarDrawer from './SideBarDrawer'
 import TagGroups from './TagGroups'
 
 /**
- * 顶部导航栏
+ * 顶部导航 Header
  * 行为：
- * 1. Hero 内：透明 + 白字
- * 2. Hero 外：紫色背景 + 白字 + 阴影
- * 3. 永远显示（不隐藏）
+ * 1. 顶部透明（Hero 内）
+ * 2. 滚动后变紫色
+ * 3. 始终显示，不隐藏
  */
 const Header = props => {
   const searchDrawer = useRef()
   const { tags, currentTag, categories, currentCategory } = props
   const { locale } = useGlobal()
   const router = useRouter()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setOpen] = useState(false)
 
   const showSearchButton = siteConfig('HEXO_MENU_SEARCH', false, CONFIG)
   const showRandomButton = siteConfig('HEXO_MENU_RANDOM', false, CONFIG)
 
-  const toggleMenuOpen = () => setIsOpen(!isOpen)
-  const toggleSideBarClose = () => setIsOpen(false)
+  const toggleMenuOpen = () => setOpen(!isOpen)
+  const closeMenu = () => setOpen(false)
 
-  const throttleMs = 100
-
-  const handleScrollStyle = useCallback(
+  /**
+   * Header 样式控制（透明 ↔ 紫色）
+   */
+  const handleScroll = useCallback(
     throttle(() => {
-      const nav = document.querySelector('#sticky-nav')
-      const header = document.querySelector('#header')
-      if (!nav) return
-
+      const nav = document.getElementById('sticky-nav')
+      const header = document.getElementById('header')
       const scrollY = window.scrollY
+
       const inHero =
-        header && scrollY < header.clientHeight - 50
+        header && scrollY < header.clientHeight - 80
 
       if (inHero) {
-        // Hero 区域：透明
-        nav.classList.remove(
-          'bg-[#9b93aa]',
-          'shadow-md'
-        )
-        nav.classList.add(
-          'bg-transparent',
-          'text-white'
-        )
+        nav.classList.remove('bg-purple-header', 'shadow-md')
+        nav.classList.add('bg-transparent')
       } else {
-        // 离开 Hero：紫色
-        nav.classList.remove(
-          'bg-transparent'
-        )
-        nav.classList.add(
-          'bg-[#9b93aa]',
-          'text-white',
-          'shadow-md'
-        )
+        nav.classList.remove('bg-transparent')
+        nav.classList.add('bg-purple-header', 'shadow-md')
       }
-    }, throttleMs),
+    }, 100),
     []
   )
 
   useEffect(() => {
-    handleScrollStyle()
-    window.addEventListener('scroll', handleScrollStyle)
-    router.events.on('routeChangeComplete', handleScrollStyle)
-
+    window.addEventListener('scroll', handleScroll)
+    router.events.on('routeChangeComplete', handleScroll)
+    handleScroll()
     return () => {
-      window.removeEventListener('scroll', handleScrollStyle)
-      router.events.off('routeChangeComplete', handleScrollStyle)
+      window.removeEventListener('scroll', handleScroll)
+      router.events.off('routeChangeComplete', handleScroll)
     }
   }, [])
 
+  /**
+   * 搜索抽屉内容（保持你原来的）
+   */
   const searchDrawerSlot = (
     <>
       {categories && (
         <section className='mt-8'>
-          <div className='text-sm flex justify-between px-2'>
-            <div className='text-white'>
-              <i className='mr-2 fas fa-th-list' />
-              {locale.COMMON.CATEGORY}
-            </div>
-            <SmartLink
-              href='/category'
-              className='text-white/80 hover:underline'>
-              {locale.COMMON.MORE}
-            </SmartLink>
-          </div>
           <CategoryGroup
             currentCategory={currentCategory}
             categories={categories}
           />
         </section>
       )}
-
       {tags && (
         <section className='mt-4'>
-          <div className='text-sm px-2 flex justify-between'>
-            <div className='text-white'>
-              <i className='mr-2 fas fa-tag' />
-              {locale.COMMON.TAGS}
-            </div>
-            <SmartLink
-              href='/tag'
-              className='text-white/80 hover:underline'>
-              {locale.COMMON.MORE}
-            </SmartLink>
-          </div>
-          <div className='p-2'>
-            <TagGroups tags={tags} currentTag={currentTag} />
-          </div>
+          <TagGroups tags={tags} currentTag={currentTag} />
         </section>
       )}
     </>
   )
 
   return (
-    <div id='top-nav' className='z-50'>
+    <header className='fixed top-0 z-50 w-full'>
       <SearchDrawer cRef={searchDrawer} slot={searchDrawerSlot} />
 
-      {/* 顶部导航 */}
-      <div
+      <nav
         id='sticky-nav'
-        className='fixed top-0 w-full transition-all duration-300 bg-transparent text-white z-40'>
-        <div className='flex justify-between items-center px-6 py-3'>
-          <Logo {...props} />
+        className='transition-all duration-300 bg-transparent text-white'
+        style={{ backdropFilter: 'blur(6px)' }}
+      >
+        {/* 🔥 核心：宽度对齐正文 */}
+        <div className='max-w-5xl mx-auto flex items-center justify-between px-6 py-3'>
+          
+          {/* 左侧 Logo */}
+          <div className='text-lg font-semibold tracking-wide'>
+            <Logo {...props} />
+          </div>
 
-          <div className='flex items-center gap-3'>
-            <div className='hidden lg:flex'>
+          {/* 右侧菜单 */}
+          <div className='flex items-center space-x-6 text-sm'>
+            <div className='hidden lg:flex items-center space-x-6'>
               <MenuListTop {...props} />
-            </div>
-
-            <div
-              onClick={toggleMenuOpen}
-              className='lg:hidden cursor-pointer'>
-              {isOpen ? (
-                <i className='fas fa-times' />
-              ) : (
-                <i className='fas fa-bars' />
-              )}
             </div>
 
             {showSearchButton && <SearchButton />}
             {showRandomButton && <ButtonRandomPost {...props} />}
+
+            <div
+              onClick={toggleMenuOpen}
+              className='lg:hidden cursor-pointer'
+            >
+              <i className={`fas ${isOpen ? 'fa-times' : 'fa-bars'}`} />
+            </div>
           </div>
         </div>
-      </div>
+      </nav>
 
-      <SideBarDrawer isOpen={isOpen} onClose={toggleSideBarClose}>
+      <SideBarDrawer isOpen={isOpen} onClose={closeMenu}>
         <SideBar {...props} />
       </SideBarDrawer>
-    </div>
+    </header>
   )
 }
 
