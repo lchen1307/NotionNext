@@ -112,17 +112,17 @@ const LayoutBase = props => {
         {/* 主区块 */}
         <main
           id='wrapper'
-          className={`${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? '' : 'pt-16'} bg-hexo-background-gray dark:bg-black w-full py-8 md:px-8 lg:px-24 min-h-screen relative`}>
+          className={`${siteConfig('HEXO_HOME_BANNER_ENABLE', null, CONFIG) ? '' : 'pt-16'}
+            bg-hexo-background-gray dark:bg-black w-full py-8 md:px-8 min-h-screen relative`}>
+        
           <div
             id='container-inner'
-            className={
-              (JSON.parse(siteConfig('LAYOUT_SIDEBAR_REVERSE'))
-                ? 'flex-row-reverse'
-                : '') +
-              ' w-full mx-auto lg:flex lg:space-x-4 justify-center relative z-10'
-            }>
+            className='w-full mx-auto flex justify-center relative z-10'>
+        
+            {/* 正文：单栏居中 */}
             <div
-              className={`${className || ''} w-full ${fullWidth ? '' : 'max-w-4xl'} h-full overflow-hidden`}>
+              className={`${className || ''} w-full max-w-3xl mx-auto h-full overflow-hidden`}>
+        
               <Transition
                 show={!onLoading}
                 appear={true}
@@ -133,15 +133,14 @@ const LayoutBase = props => {
                 leaveFrom='opacity-100 translate-y-0'
                 leaveTo='opacity-0 -translate-y-16'
                 unmount={false}>
-                {/* 主区上部嵌入 */}
+        
                 {slotTop}
-
                 {children}
+        
               </Transition>
             </div>
-
-            {/* 右侧栏 */}
-            <SideRight {...props} />
+        
+            {/* ❌ 右侧栏已彻底移除 */}
           </div>
         </main>
 
