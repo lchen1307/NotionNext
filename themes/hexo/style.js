@@ -231,23 +231,6 @@ const Style = () => {
         scrollbar-width: thin;
         scrollbar-color: var(--theme-color) transparent;
       }
-
-      // 热力图
-      .react-calendar-heatmap .color-empty {
-        fill: #f0f0f0;
-      }
-      .react-calendar-heatmap .color-github-1 {
-        fill: #d6e685;
-      }
-      .react-calendar-heatmap .color-github-2 {
-        fill: #8cc665;
-      }
-      .react-calendar-heatmap .color-github-3 {
-        fill: #44a340;
-      }
-      .react-calendar-heatmap .color-github-4 {
-        fill: #1e6823;
-      }
       
     `}</style>
   )
