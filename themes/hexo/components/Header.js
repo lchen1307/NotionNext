@@ -1,5 +1,3 @@
-我目前的主页如图所示，希望header能和下面的card对齐，而不是靠在左右两边。目前header部分的代码为：
-
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { useRouter } from 'next/router'
