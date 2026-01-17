@@ -1,3 +1,5 @@
+我目前的主页如图所示，希望header能和下面的card对齐，而不是靠在左右两边。目前header部分的代码为：
+
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { useRouter } from 'next/router'
@@ -22,9 +24,10 @@ const Header = props => {
   const showSearchButton = siteConfig('HEXO_MENU_SEARCH', false, CONFIG)
   const showRandomButton = siteConfig('HEXO_MENU_RANDOM', false, CONFIG)
 
+  // === 透明 → 紫色（不隐藏）===
   useEffect(() => {
     const onScroll = () => {
-      const header = document.querySelector('#sticky-nav')
+      const header = document.querySelector('#header')
       const threshold = header ? header.clientHeight - 80 : 120
       setScrolled(window.scrollY > threshold)
     }
@@ -42,7 +45,7 @@ const Header = props => {
     <div id="top-nav" className="z-40">
       <SearchDrawer />
 
-      {/* ===== Header 本体（全宽背景） ===== */}
+      {/* ===== Header 本体 ===== */}
       <div
         id="sticky-nav"
         className={`
@@ -51,11 +54,11 @@ const Header = props => {
         `}
         style={{ backdropFilter: scrolled ? 'blur(6px)' : 'none' }}
       >
-        {/* ===== 内容对齐容器（与 Card 完全一致） ===== */}
-        <div className="mx-auto max-w-5xl px-6 md:px-10">
+        {/* 🔥 关键：和正文一模一样的容器 🔥 */}
+        <div className="mx-auto max-w-5xl px-2 md:px-4">
           <div className="flex items-center justify-between h-14">
 
-            {/* 左侧 Logo */}
+            {/* 左侧：站点名 */}
             <div className="text-xl font-semibold text-white">
               <Logo {...props} />
             </div>
@@ -84,7 +87,7 @@ const Header = props => {
         </div>
       </div>
 
-      {/* ===== 侧边栏 ===== */}
+      {/* 侧边栏 */}
       <SideBarDrawer isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <SideBar {...props} />
       </SideBarDrawer>
