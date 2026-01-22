@@ -59,7 +59,7 @@ const BlogPostListScroll = ({
         "
       >
         {/* 🔗 连续文章流（不再是一个个卡片） */}
-        <div className="space-y-12">
+        <div className="space-y-6">
           {postsToShow.map(post => (
             <BlogPostCard
               key={post.id}
