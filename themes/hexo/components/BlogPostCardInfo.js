@@ -8,8 +8,6 @@ import TagItemMini from './TagItemMini'
 
 /**
  * 博客列表的文字内容
- * @param {*} param0
- * @returns
  */
 export const BlogPostCardInfo = ({
   post,
@@ -41,28 +39,7 @@ export const BlogPostCardInfo = ({
             </SmartLink>
           </h2>
 
-          {/* 分类 */}
-          {post?.category && (
-            <div
-              className={`flex mt-2 items-center ${
-                showPreview ? 'justify-center' : 'justify-start'
-              } flex-wrap dark:text-gray-500 text-gray-400`}
-            >
-              <SmartLink
-                href={`/category/${post.category}`}
-                passHref
-                className='cursor-pointer font-light text-sm menu-link hover:text-indigo-700 dark:hover:text-indigo-400 transform'
-              >
-                <i className='mr-1 far fa-folder' />
-                {post.category}
-              </SmartLink>
-
-              <TwikooCommentCount
-                className='text-sm hover:text-indigo-700 dark:hover:text-indigo-400'
-                post={post}
-              />
-            </div>
-          )}
+          {/* ✅ 分类从这里移除（不放在标题下面了） */}
         </header>
 
         {/* 摘要 */}
@@ -90,7 +67,7 @@ export const BlogPostCardInfo = ({
       </div>
 
       <div>
-        {/* 日期 + 标签（靠左排列，自动换行） */}
+        {/* ✅ 底部：日期 → 分类 → 评论数 → tags */}
         <div className='text-gray-400 flex items-center flex-wrap gap-x-4 gap-y-2'>
           {/* 日期 */}
           <SmartLink
@@ -102,7 +79,25 @@ export const BlogPostCardInfo = ({
             {post?.publishDay || post.lastEditedDay}
           </SmartLink>
 
-          {/* 标签 */}
+          {/* 分类（放到日期和 tags 中间） */}
+          {post?.category && (
+            <SmartLink
+              href={`/category/${post.category}`}
+              passHref
+              className='cursor-pointer font-light text-sm menu-link hover:text-indigo-700 dark:hover:text-indigo-400'
+            >
+              <i className='mr-1 far fa-folder' />
+              {post.category}
+            </SmartLink>
+          )}
+
+          {/* 评论数（如果你也想跟着分类一起放底部） */}
+          <TwikooCommentCount
+            className='text-sm hover:text-indigo-700 dark:hover:text-indigo-400'
+            post={post}
+          />
+
+          {/* tags */}
           <div className='flex flex-wrap gap-2'>
             {post.tagItems?.map(tag => (
               <TagItemMini key={tag.name} tag={tag} />
