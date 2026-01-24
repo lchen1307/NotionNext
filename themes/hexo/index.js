@@ -34,6 +34,9 @@ import TocDrawerButton from './components/TocDrawerButton'
 import CONFIG from './config'
 import { Style } from './style'
 
+// 新增目录
+import SideTocLeft from './components/SideTocLeft' 
+
 const AlgoliaSearchModal = dynamic(
   () => import('@/components/AlgoliaSearchModal'),
   { ssr: false }
@@ -123,38 +126,47 @@ const LayoutBase = props => {
         >
 
 
-          <div className='w-full flex justify-center'>
-            {/* =========================
-                白色大 Card（关键）
-            ========================== */}
-            <div
-              className={`
-                w-full max-w-5xl
-                mx-auto
-                -mt-6 md:-mt-10
-                bg-white dark:bg-hexo-black-gray
-                rounded-2xl
-                shadow-card
-                px-6 md:px-10
-                py-8 md:py-10
-                relative z-20
-              `}
-            >
+{/* 外层容器：给左目录 + 白卡留空间 */}
+<div className="mx-auto w-full max-w-6xl px-4 md:px-8">
+  <div className="flex gap-8 justify-center">
+    {/* 左侧目录：仅桌面端显示，且仅文章页有 toc 时显示 */}
+    {post?.toc?.length > 1 && (
+      <div className="hidden xl:block sticky top-24 self-start">
+        <SideTocLeft post={post} />
+      </div>
+    )}
 
-              <Transition
-                show={!onLoading}
-                appear
-                enter='transition ease-in-out duration-700 transform'
-                enterFrom='opacity-0 translate-y-16'
-                enterTo='opacity-100'
-                leave='transition ease-in-out duration-300 transform'
-                leaveFrom='opacity-100'
-                leaveTo='opacity-0 -translate-y-16'
-                unmount={false}
-              >
-                {slotTop}
-                {children}
-              </Transition>
+              {/* 白色大 Card：文章页略窄，其它页面保持原宽 */}
+              <div className="flex-1 flex justify-center">
+                <div
+                  className={`
+                    w-full ${post ? 'max-w-4xl' : 'max-w-5xl'}
+                    mx-auto
+                    -mt-6 md:-mt-10
+                    bg-white dark:bg-hexo-black-gray
+                    rounded-2xl
+                    shadow-card
+                    px-6 md:px-10
+                    py-8 md:py-10
+                    relative z-20
+                  `}
+                >
+                  <Transition
+                    show={!onLoading}
+                    appear
+                    enter="transition ease-in-out duration-700 transform"
+                    enterFrom="opacity-0 translate-y-16"
+                    enterTo="opacity-100"
+                    leave="transition ease-in-out duration-300 transform"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0 -translate-y-16"
+                    unmount={false}
+                  >
+                    {slotTop}
+                    {children}
+                  </Transition>
+                </div>
+              </div>
             </div>
           </div>
         </main>
