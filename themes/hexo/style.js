@@ -15,6 +15,7 @@ const Style = () => {
     <style jsx global>{`
       :root {
         --theme-color: ${themeColor};
+        --menu-hover-color: #5aa9ff;   /* 蓝色 */
       }
 
       // 底色
@@ -26,22 +27,41 @@ const Style = () => {
       }
 
       /*  菜单下划线动画 */
+      // #theme-hexo .menu-link {
+      //   text-decoration: none;
+      //   background-image: linear-gradient(
+      //     var(--theme-color),
+      //     var(--theme-color)
+      //   );
+      //   background-repeat: no-repeat;
+      //   background-position: bottom center;
+      //   background-size: 0 2px;
+      //   transition: background-size 100ms ease-in-out;
+      // }
+
+      // #theme-hexo .menu-link:hover {
+      //   background-size: 100% 2px;
+      //   color: var(--theme-color);
+      // }
+
       #theme-hexo .menu-link {
         text-decoration: none;
         background-image: linear-gradient(
-          var(--theme-color),
-          var(--theme-color)
+          var(--menu-hover-color),
+          var(--menu-hover-color)
         );
         background-repeat: no-repeat;
         background-position: bottom center;
         background-size: 0 2px;
-        transition: background-size 100ms ease-in-out;
+        transition: background-size 100ms ease-in-out, color 100ms ease-in-out;
       }
-
+      
       #theme-hexo .menu-link:hover {
         background-size: 100% 2px;
-        color: var(--theme-color);
+        color: var(--menu-hover-color);
       }
+
+      
 
       /* 文章列表中标题行悬浮时的文字颜色 */
       #theme-hexo h2:hover .menu-link {
