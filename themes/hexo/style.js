@@ -44,23 +44,27 @@ const Style = () => {
       //   color: var(--theme-color);
       // }
 
-      #theme-hexo .menu-link {
-        text-decoration: none;
+
+      /* ✅ 只改 Header（sticky-nav）里的 menu-link 下划线 */
+      #theme-hexo #sticky-nav .menu-link {
         background-image: linear-gradient(
           var(--menu-hover-color),
           var(--menu-hover-color)
-        );
-        background-repeat: no-repeat;
-        background-position: bottom center;
-        background-size: 0 2px;
-        transition: background-size 100ms ease-in-out, color 100ms ease-in-out;
+        ) !important;
       }
       
-      #theme-hexo .menu-link:hover {
+      /* ✅ Header hover：下划线变蓝 + 文字变蓝（正文不受影响） */
+      #theme-hexo #sticky-nav .menu-link:hover {
         background-size: 100% 2px;
-        color: var(--menu-hover-color);
+        color: var(--menu-hover-color) !important;
       }
-
+      
+      /* ✅ Header hover：图标也一起变蓝（只在 header） */
+      #theme-hexo #sticky-nav .menu-link:hover i,
+      #theme-hexo #sticky-nav .menu-link:hover svg {
+        color: var(--menu-hover-color) !important;
+        fill: var(--menu-hover-color) !important;
+      }
       
 
       /* 文章列表中标题行悬浮时的文字颜色 */
