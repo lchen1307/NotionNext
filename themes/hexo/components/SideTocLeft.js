@@ -3,7 +3,7 @@ import CONFIG from '../config'
 
 /**
  * 桌面端：文章页左侧目录（放在灰底上，不占用白色card）
- * 依赖 post.toc（NotionNext 会给 toc 数组）
+ * 点击目录：平滑滚动到正文锚点，并处理固定 Header 的遮挡偏移
  */
 export default function SideTocLeft({ post }) {
   const toc = post?.toc || []
@@ -11,20 +11,47 @@ export default function SideTocLeft({ post }) {
 
   const themeColor = siteConfig('HEXO_THEME_COLOR', '#928CEE', CONFIG)
 
-  // 生成缩进：让 2.1/2.2/2.3 这类二级标题更明显缩进（约 2em）
+  // 你的 header 是 fixed 的，这里给个偏移（按你实际 header 高度调）
+  // 例如 header 高 56px + 额外留白 12px => 68
+  const HEADER_OFFSET = 72
+
   const getPaddingLeft = item => {
     const raw = item?.indent ?? item?.level ?? item?.depth ?? 0
     const level = Math.max(0, Number(raw) || 0)
-    // level=0 不缩进；level>=1 统一缩进 2em（≈32px）；更深层继续加
     const px = level === 0 ? 0 : 32 + (level - 1) * 12
     return `${Math.min(68, px)}px`
   }
 
-  // 尽量兼容 NotionNext 的 toc 字段
   const getId = item => item?.id || item?.blockId || item?.anchor || ''
-
   const getTitle = item =>
     item?.text || item?.title || item?.content || item?.name || ''
+
+  const scrollToId = id => {
+    if (!id) return
+
+    // 1) 优先按 id 查
+    let el = document.getElementById(id)
+
+    // 2) 兜底：有些 Notion 渲染会把锚点放在 a[name] 或 data-id 上（不同版本可能不一样）
+    if (!el) {
+      el =
+        document.querySelector(`[id="${CSS.escape(id)}"]`) ||
+        document.querySelector(`[name="${CSS.escape(id)}"]`) ||
+        document.querySelector(`[data-id="${CSS.escape(id)}"]`)
+    }
+
+    if (!el) return
+
+    const rect = el.getBoundingClientRect()
+    const targetY = window.scrollY + rect.top - HEADER_OFFSET
+
+    window.scrollTo({ top: targetY, behavior: 'smooth' })
+
+    // 更新地址栏 hash（不触发跳转）
+    try {
+      history.replaceState(null, '', `#${id}`)
+    } catch (e) {}
+  }
 
   return (
     <aside className='w-64'>
@@ -43,8 +70,10 @@ export default function SideTocLeft({ post }) {
                 key={`${id || 'toc'}-${idx}`}
                 href={id ? `#${id}` : '#'}
                 className='block leading-6 text-gray-500 dark:text-gray-400 hover:opacity-100'
-                style={{
-                  paddingLeft: getPaddingLeft(item)
+                style={{ paddingLeft: getPaddingLeft(item) }}
+                onClick={e => {
+                  e.preventDefault()
+                  scrollToId(id)
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.color = themeColor
