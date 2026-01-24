@@ -11,29 +11,40 @@ export default function SideTocLeft({ post }) {
 
   const themeColor = siteConfig('HEXO_THEME_COLOR', '#928CEE', CONFIG)
 
+  // 生成缩进：让 2.1/2.2/2.3 这类二级标题更明显缩进（约 2em）
+  const getPaddingLeft = item => {
+    const raw = item?.indent ?? item?.level ?? item?.depth ?? 0
+    const level = Math.max(0, Number(raw) || 0)
+    // level=0 不缩进；level>=1 统一缩进 2em（≈32px）；更深层继续加
+    const px = level === 0 ? 0 : 32 + (level - 1) * 12
+    return `${Math.min(68, px)}px`
+  }
+
+  // 尽量兼容 NotionNext 的 toc 字段
+  const getId = item => item?.id || item?.blockId || item?.anchor || ''
+
+  const getTitle = item =>
+    item?.text || item?.title || item?.content || item?.name || ''
+
   return (
-    <aside className="w-64">
-      <div className="rounded-2xl bg-white/80 dark:bg-hexo-black-gray/80 shadow-sm border border-gray-100 dark:border-black p-4">
-        <div className="text-sm font-semibold text-gray-600 dark:text-gray-200 mb-3">
+    <aside className='w-64'>
+      <div className='rounded-2xl bg-white/80 dark:bg-hexo-black-gray/80 shadow-sm border border-gray-100 dark:border-black p-4'>
+        <div className='text-sm font-semibold text-gray-600 dark:text-gray-200 mb-3'>
           目录
         </div>
 
-        <nav className="text-sm space-y-2">
+        <nav className='text-sm space-y-2'>
           {toc.map((item, idx) => {
-            const id = item?.id || item?.blockId || item?.anchor || ''
-            const title =
-              item?.text || item?.title || item?.content || item?.name || ''
-            const indent = item?.indent ?? item?.level ?? item?.depth ?? 0
+            const id = getId(item)
+            const title = getTitle(item)
 
-            // NotionNext 通常 headings 会有对应的 #id
             return (
               <a
-                key={`${id}-${idx}`}
+                key={`${id || 'toc'}-${idx}`}
                 href={id ? `#${id}` : '#'}
-                className="block leading-6 text-gray-500 dark:text-gray-400 hover:opacity-100"
+                className='block leading-6 text-gray-500 dark:text-gray-400 hover:opacity-100'
                 style={{
-                  paddingLeft: `${Math.min(4, Number(indent) || 0) * 12}px`,
-                  color: undefined
+                  paddingLeft: getPaddingLeft(item)
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.color = themeColor
