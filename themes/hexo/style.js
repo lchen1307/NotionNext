@@ -45,25 +45,21 @@ const Style = () => {
       // }
 
 
-      /* ✅ 只改 Header（sticky-nav）里的 menu-link 下划线 */
-      #theme-hexo #sticky-nav .menu-link {
+      #theme-hexo .menu-link {
+        text-decoration: none;
         background-image: linear-gradient(
           var(--menu-hover-color),
           var(--menu-hover-color)
-        ) !important;
+        );
+        background-repeat: no-repeat;
+        background-position: bottom center;
+        background-size: 0 2px;
+        transition: background-size 100ms ease-in-out, color 100ms ease-in-out;
       }
       
-      /* ✅ Header hover：下划线变蓝 + 文字变蓝（正文不受影响） */
-      #theme-hexo #sticky-nav .menu-link:hover {
+      #theme-hexo .menu-link:hover {
         background-size: 100% 2px;
-        color: var(--menu-hover-color) !important;
-      }
-      
-      /* ✅ Header hover：图标也一起变蓝（只在 header） */
-      #theme-hexo #sticky-nav .menu-link:hover i,
-      #theme-hexo #sticky-nav .menu-link:hover svg {
-        color: var(--menu-hover-color) !important;
-        fill: var(--menu-hover-color) !important;
+        color: var(--menu-hover-color);
       }
       
 
