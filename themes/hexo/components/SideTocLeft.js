@@ -24,6 +24,7 @@ export default function SideTocLeft({ post }) {
             const title =
               item?.text || item?.title || item?.content || item?.name || ''
             const indent = item?.indent ?? item?.level ?? item?.depth ?? 0
+            const indentLevel = Number(indent) || 0
 
             // NotionNext 通常 headings 会有对应的 #id
             return (
@@ -32,7 +33,8 @@ export default function SideTocLeft({ post }) {
                 href={id ? `#${id}` : '#'}
                 className="block leading-6 text-gray-500 dark:text-gray-400 hover:opacity-100"
                 style={{
-                  paddingLeft: `${Math.min(4, Number(indent) || 0) * 12}px`,
+                  // 核心修改：按层级设置 em 缩进，二级标题缩进 2em
+                  paddingLeft: `${(indentLevel - 1) * 2}em`,
                   color: undefined
                 }}
                 onMouseEnter={e => {
@@ -40,6 +42,10 @@ export default function SideTocLeft({ post }) {
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.color = ''
+                }}
+                onClick={e => {
+                  // 空 ID 时阻止默认跳转，避免跳到页面顶部
+                  if (!id) e.preventDefault()
                 }}
               >
                 {title}
