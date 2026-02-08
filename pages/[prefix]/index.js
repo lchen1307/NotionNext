@@ -14,10 +14,24 @@ import { idToUuid } from 'notion-utils'
 import { useEffect, useState } from 'react'
 
 /**
+ * 仅一级 slug：/about, /oops 等
+ */
+const RESERVED_PREFIX = new Set(['oops', '404', '500', 'api'])
+
+/**
+ * 判断是否像 Notion PageId（32 位 hex，可带 '-'）
+ * 例如：2c79d11fc50f815a89d3e7266a1c3d97
+ * 或：2c79d11f-c50f-815a-89d3-e7266a1c3d97
+ */
+function looksLikeNotionPageId(str) {
+  if (!str || typeof str !== 'string') return false
+  const compact = str.replace(/-/g, '')
+  return /^[0-9a-fA-F]{32}$/.test(compact)
+}
+
+/**
  * 根据notion的slug访问页面
  * 只解析一级目录例如 /about
- * @param {*} props
- * @returns
  */
 const Slug = props => {
   const { post } = props
@@ -30,18 +44,14 @@ const Slug = props => {
 
   /**
    * 验证文章密码
-   * @param {*} passInput
    */
   const validPassword = passInput => {
-    if (!post) {
-      return false
-    }
+    if (!post) return false
     const encrypt = md5(post?.slug + passInput)
     if (passInput && encrypt === post?.password) {
       setLock(false)
-      // 输入密码存入localStorage，下次自动提交
       localStorage.setItem('password_' + router.asPath, passInput)
-      showNotification(locale.COMMON.ARTICLE_UNLOCK_TIPS) // 设置解锁成功提示显示
+      showNotification(locale.COMMON.ARTICLE_UNLOCK_TIPS)
       return true
     }
     return false
@@ -49,30 +59,24 @@ const Slug = props => {
 
   // 文章加载
   useEffect(() => {
-    // 文章加密
     if (post?.password && post?.password !== '') {
       setLock(true)
     } else {
       setLock(false)
     }
 
-    // 读取上次记录 自动提交密码
+    // 自动提交密码
     const passInputs = getPasswordQuery(router.asPath)
     if (passInputs.length > 0) {
       for (const passInput of passInputs) {
-        if (validPassword(passInput)) {
-          break // 密码验证成功，停止尝试
-        }
+        if (validPassword(passInput)) break
       }
     }
   }, [post])
 
-  // 文章加载
+  // 解锁后生成目录与内容
   useEffect(() => {
-    if (lock) {
-      return
-    }
-    // 文章解锁后生成目录与内容
+    if (lock) return
     if (post?.blockMap?.block) {
       post.content = Object.keys(post.blockMap.block).filter(
         key => post.blockMap.block[key]?.value?.parent_id === post.id
@@ -83,13 +87,11 @@ const Slug = props => {
 
   props = { ...props, lock, validPassword }
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
+
   return (
     <>
-      {/* 文章布局 */}
       <DynamicLayout theme={theme} layoutName='LayoutSlug' {...props} />
-      {/* 解锁密码提示框 */}
       {post?.password && post?.password !== '' && !lock && <Notification />}
-      {/* 导流工具 */}
       <OpenWrite />
     </>
   )
@@ -97,27 +99,30 @@ const Slug = props => {
 
 export async function getStaticPaths() {
   if (!BLOG.isProd) {
-    return {
-      paths: [],
-      fallback: true
-    }
+    return { paths: [], fallback: true }
   }
 
   const from = 'slug-paths'
   const { allPages } = await getGlobalData({ from })
+
   const paths = allPages
     ?.filter(row => checkSlugHasNoSlash(row))
     .map(row => ({ params: { prefix: row.slug } }))
-  return {
-    paths: paths,
-    fallback: true
-  }
+
+  return { paths, fallback: true }
 }
 
 export async function getStaticProps({ params: { prefix }, locale }) {
+  // ✅ 关键修复：拦截保留路由，避免触发 slug-props-oops
+  if (RESERVED_PREFIX.has(prefix)) {
+    return { notFound: true }
+  }
+
   let fullSlug = prefix
   const from = `slug-props-${fullSlug}`
   const props = await getGlobalData({ from, locale })
+
+  // 伪静态 html 后缀
   if (siteConfig('PSEUDO_STATIC', false, props.NOTION_CONFIG)) {
     if (!fullSlug.endsWith('.html')) {
       fullSlug += '.html'
@@ -132,20 +137,21 @@ export async function getStaticProps({ params: { prefix }, locale }) {
     )
   })
 
-  // 处理非列表内文章的内信息
+  // 列表内找不到：尝试把 prefix 当作 pageId 直接拉（但必须像 Notion PageId）
   if (!props?.post) {
     const pageId = prefix
-    if (pageId.length >= 32) {
+    if (looksLikeNotionPageId(pageId)) {
       const post = await getPost(pageId)
       props.post = post
     }
   }
+
   if (!props?.post) {
-    // 无法获取文章
     props.post = null
   } else {
     await processPostData(props, from)
   }
+
   return {
     props,
     revalidate: process.env.EXPORT
