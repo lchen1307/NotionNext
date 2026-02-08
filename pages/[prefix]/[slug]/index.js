@@ -6,10 +6,23 @@ import { idToUuid } from 'notion-utils'
 import Slug from '..'
 
 /**
+ * 保留路由：防止被当作文章路径进入 slug-props
+ * （按需增减，最重要是 oops）
+ */
+const RESERVED = new Set(['oops', '404', '500', 'api'])
+
+/**
+ * 判断是否像 Notion PageId（32 位 hex，可带 '-'）
+ */
+function looksLikeNotionPageId(str) {
+  if (!str || typeof str !== 'string') return false
+  const compact = str.replace(/-/g, '')
+  return /^[0-9a-fA-F]{32}$/.test(compact)
+}
+
+/**
  * 根据notion的slug访问页面
  * 解析二级目录 /article/about
- * @param {*} props
- * @returns
  */
 const PrefixSlug = props => {
   return <Slug {...props} />
@@ -17,35 +30,29 @@ const PrefixSlug = props => {
 
 export async function getStaticPaths() {
   if (!BLOG.isProd) {
-    return {
-      paths: [],
-      fallback: true
-    }
+    return { paths: [], fallback: true }
   }
 
   const from = 'slug-paths'
   const { allPages } = await getGlobalData({ from })
 
-  // 根据slug中的 / 分割成prefix和slug两个字段 ; 例如 article/test
-  // 最终用户可以通过  [domain]/[prefix]/[slug] 路径访问，即这里的 [domain]/article/test
   const paths = allPages
     ?.filter(row => checkSlugHasOneSlash(row))
-    .map(row => ({
-      params: { prefix: row.slug.split('/')[0], slug: row.slug.split('/')[1] }
-    }))
+    .map(row => {
+      const [prefix, slug] = row.slug.split('/')
+      return { params: { prefix, slug } }
+    })
 
-  // 增加一种访问路径 允许通过 [category]/[slug] 访问文章
-  // 例如文章slug 是 test ，然后文章的分类category是 production
-  // 则除了 [domain]/[slug] 以外，还支持分类名访问: [domain]/[category]/[slug]
-
-  return {
-    paths: paths,
-    fallback: true
-  }
+  return { paths, fallback: true }
 }
 
 export async function getStaticProps({ params: { prefix, slug }, locale }) {
-  const fullSlug = prefix + '/' + slug
+  // ✅ 拦截保留路由，避免 slug-props-oops 这类触发构建崩溃
+  if (RESERVED.has(prefix) || RESERVED.has(slug)) {
+    return { notFound: true }
+  }
+
+  const fullSlug = `${prefix}/${slug}`
   const from = `slug-props-${fullSlug}`
   const props = await getGlobalData({ from, locale })
 
@@ -57,21 +64,31 @@ export async function getStaticProps({ params: { prefix, slug }, locale }) {
     )
   })
 
-  // 处理非列表内文章的内信息
+  // 列表内找不到：尝试把 slug / fullSlug 当作 pageId（必须先校验格式）
+  // 注意：这只是兜底，通常 prefix/slug 不是 pageId；但防止用户直接用 pageId 访问
   if (!props?.post) {
-    const pageId = slug.slice(-1)[0]
-    if (pageId.length >= 32) {
+    // 候选：优先 slug（更可能是纯 pageId），再尝试 fullSlug
+    const candidates = [slug, fullSlug]
+    let pageId = null
+    for (const c of candidates) {
+      if (looksLikeNotionPageId(c)) {
+        pageId = c
+        break
+      }
+    }
+
+    if (pageId) {
       const post = await getPost(pageId)
       props.post = post
     }
   }
 
   if (!props?.post) {
-    // 无法获取文章
     props.post = null
   } else {
     await processPostData(props, from)
   }
+
   return {
     props,
     revalidate: process.env.EXPORT
